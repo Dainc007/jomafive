@@ -57,17 +57,18 @@ class CompetitionController extends Controller
                     'class' => $request['class'],
                 ]
             );
-
-            foreach ($request['pickedTeams'] as $teamName) {
-                $teamID = JuniorTeam::where('name', $teamName)->where('class', $request['class'])->value('id');
-                for ($i = 1; 4 > $i; $i++) {
-                    DB::table('junior_league_tables')->insert([
-                        'teamName' => $teamName,
-                        'competitionID' => $competitionID,
-                        'teamID' => $teamID,
-                        'level' => JuniorTeam::where('id', $teamID)->value('level'),
-                        'stage' => $i,
-                    ]);
+            foreach ($request['pickedTeams'] as $teamGroup => $teams) {
+                foreach ($teams as $teamName) {
+                    $teamID = JuniorTeam::where('name', $teamName)->where('class', $request['class'])->value('id');
+                    for ($i = 1; 4 > $i; $i++) {
+                        DB::table('junior_league_tables')->insert([
+                            'teamName' => $teamName,
+                            'competitionID' => $competitionID,
+                            'teamID' => $teamID,
+                            'group'  => $teamGroup,
+                            'stage' => $i,
+                        ]);
+                    }
                 }
             }
 
@@ -146,29 +147,29 @@ class CompetitionController extends Controller
     {
         return  view('leagueTables.juniorShow', [
             'juniorTeams' => DB::table('junior_league_tables')->where('competitionID', $id)
-                ->select('level', 'teamId', 'teamName', DB::raw(
+                ->select('group', 'teamId', 'teamName', DB::raw(
                     'SUM(points) as points, SUM(bilans) as bilans, SUM(games) as games, SUM(wins) as wins,
                     SUM(draws) as draws, SUM(losts) as losts'
                 ))
-                ->groupBy('teamId', 'level', 'teamName')
+                ->groupBy('teamId', 'group', 'teamName')
                 ->orderBy('points', 'DESC')
-                ->orderBy('bilans', 'DESC') 
+                ->orderBy('bilans', 'DESC')
                 ->get(),
 
             'stage1' => DB::table('junior_league_tables')->where('competitionID', $id)->where('stage', 1)
-                ->orderBy('level', 'ASC')
+                ->orderBy('group', 'ASC')
                 ->orderBy('points', 'DESC')
                 ->orderBy('bilans', 'DESC')
                 ->get(),
 
             'stage2' => DB::table('junior_league_tables')->where('competitionID', $id)->where('stage', 2)
-                ->orderBy('level', 'ASC')
+                ->orderBy('group', 'ASC')
                 ->orderBy('points', 'DESC')
                 ->orderBy('bilans', 'DESC')
                 ->get(),
 
             'stage3' => DB::table('junior_league_tables')->where('competitionID', $id)->where('stage', 3)
-                ->orderBy('level', 'ASC')
+                ->orderBy('group', 'ASC')
                 ->orderBy('points', 'DESC')
                 ->orderBy('bilans', 'DESC')
                 ->get(),

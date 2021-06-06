@@ -11,21 +11,21 @@
             <form method="POST" action="{{route('competitions.store', ['request']) }}" enctype="multipart/form-data">
                 <div class="col form-group">
                     <label for="pickedTeams">Grupa A</label>
-                    <select multiple class="form-control @error('pickedTeams') is-invalid @enderror" id="pickedTeams" name="pickedTeams['groupA'][]">
+                    <select multiple class="form-control @error('pickedTeams') is-invalid @enderror" id="pickedTeams" name="pickedTeams[1][]">
                         @foreach($teams as $team)
                         <option>{{$team->name}}</option>
                         @endforeach
                     </select>
 
                     <label for="pickedTeams">Grupa B</label>
-                    <select multiple class="form-control @error('pickedTeams') is-invalid @enderror" id="pickedTeams" name="pickedTeams['groupB'][]">
+                    <select multiple class="form-control @error('pickedTeams') is-invalid @enderror" id="pickedTeams" name="pickedTeams[2][]">
                         @foreach($teams as $team)
                         <option>{{$team->name}}</option>
                         @endforeach
                     </select>
 
                     <label for="pickedTeams">Grupa C</label>
-                    <select multiple class="form-control @error('pickedTeams') is-invalid @enderror" id="pickedTeams" name="pickedTeams['groupC'][]">
+                    <select multiple class="form-control @error('pickedTeams') is-invalid @enderror" id="pickedTeams" name="pickedTeams[3][]">
                         @foreach($teams as $team)
                         <option>{{$team->name}}</option>
                         @endforeach

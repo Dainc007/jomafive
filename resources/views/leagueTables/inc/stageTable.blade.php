@@ -1,10 +1,10 @@
   <div class="col-4 ">
       <table class="table table-sm table-primary table-hover">
           <thead>
+              <caption>Grupa A</caption>
               <tr>
                   <th scope="col">#</th>
                   <th scope="col">Zespół</th>
-                  <th scope="col">level</th>
                   <th scope="col">PLD</th>
                   <th scope="col">W</th>
                   <th scope="col">D</th>
@@ -21,7 +21,6 @@
               <tr>
                   <th scope="row"> {{$i}} </th>
                   <td>{{$team->teamName}}</td>
-                  <td>{{$team->level}}</td>
                   <td>{{$team->games}}</td>
                   <td>{{$team->wins}}</td>
                   <td>{{$team->draws}}</td>
@@ -41,10 +40,10 @@
   <div class="col-4">
       <table class="table table-warning table-sm table-hover">
           <thead>
+              <caption>Grupa B</caption>
               <tr>
                   <th scope="col">#</th>
                   <th scope="col">Zespół</th>
-                  <th scope="col">level</th>
                   <th scope="col">PLD</th>
                   <th scope="col">W</th>
                   <th scope="col">D</th>
@@ -61,7 +60,6 @@
               <tr>
                   <th scope="row"> {{$i}} </th>
                   <td>{{$team->teamName}}</td>
-                  <td>{{$team->level}}</td>
                   <td>{{$team->games}}</td>
                   <td>{{$team->wins}}</td>
                   <td>{{$team->draws}}</td>
@@ -82,10 +80,10 @@
 
       <table class="table table-success table-sm table-hover">
           <thead>
+              <caption>Grupa C</caption>
               <tr>
                   <th scope="col">#</th>
                   <th scope="col">Zespół</th>
-                  <th scope="col">level</th>
                   <th scope="col">PLD</th>
                   <th scope="col">W</th>
                   <th scope="col">D</th>
@@ -102,7 +100,6 @@
               <tr>
                   <th scope="row"> {{$i}} </th>
                   <td>{{$team->teamName}}</td>
-                  <td>{{$team->level}}</td>
                   <td>{{$team->games}}</td>
                   <td>{{$team->wins}}</td>
                   <td>{{$team->draws}}</td>

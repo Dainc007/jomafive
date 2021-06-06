@@ -17,7 +17,6 @@ class CreateJuniorLeagueTablesTable extends Migration
             $table->id();
             $table->string('teamName');
             $table->integer('teamId');
-            $table->integer('level');
             $table->integer('points')->default(0);
             $table->integer('games')->default(0);
             $table->integer('wins')->default(0);
@@ -28,6 +27,7 @@ class CreateJuniorLeagueTablesTable extends Migration
             $table->integer('bilans')->default(0);
             $table->integer('competitionID')->nullable();
             $table->integer('stage')->nullable();
+            $table->integer('group')->nullable();
             $table->timestamps();
         });
     }
