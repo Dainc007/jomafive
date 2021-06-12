@@ -2,6 +2,8 @@
 
 namespace App\Http\Services;
 
+use Illuminate\Support\Facades\DB;
+
 class GenerateFixtureService
 {
     public function __construct(array $teams)
@@ -9,12 +11,12 @@ class GenerateFixtureService
         $totalTeams = 10;
         $maxTrials = 10_000_000;
         $start = time();
-        
+
         $this->totalTeams = $totalTeams;
         $this->maxTrials  = $maxTrials;
         $this->start      = $start;
         $this->teams      = $teams;
-        $this->fixture    = $this->generateFixture($teams);
+        $this->fixtures = $this->generateFixtures($teams);
     }
 
     private function meetings(array $teams): array
@@ -67,9 +69,10 @@ class GenerateFixtureService
         return $result;
     }
 
-    public function generateFixture(array $teams)
+    private function generateFixtures(array $teams)
     {
         $trial = 0;
+        $fixtures = [];
 
         do {
             if ($trial === $this->maxTrials) {
@@ -92,19 +95,21 @@ class GenerateFixtureService
             $meetings
         );
 
-        echo "```\n";
-        printf('Liczba prób: %d%s', $trial, "\n");
-        echo "\n";
-        printf('Czas: %ds%s', time() - $this->start, "\n");
-        echo "\n";
         foreach ($meetings as $round => $matches) {
-            printf('Kolejka #%d%s', $round + 1, "\n\n");
+
             foreach ($matches as $index => $teams) {
                 [$teamA, $teamB] = $teams;
-                printf('%d. %s vs. %s%s', $index + 1, $teamA, $teamB, "\n");
+
+                $pair = [];
+                $pair['host'] = $teamA;
+                $pair['visitor'] = $teamB;
+                $pair['round'] = $round;
+
+                $fixtures[] = $pair;
             }
-            echo "\n";
         }
-        echo "```\n";
+
+
+        return $fixtures;
     }
 }

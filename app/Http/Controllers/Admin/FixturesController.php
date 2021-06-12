@@ -108,37 +108,43 @@ class FixturesController extends Controller
 
         //to wszystko działa.
 
-             return view('games.show', [
-                'game' => $game,
-                'hosts' => PlayerStats::join('players', function ($join) {
-                    $join->on('player_stats.playerID', '=', 'players.id');})
-                    ->get(['players.name as name', 'players.surname as surname', 'player_stats.teamName as teamName', 'player_stats.apperiance as apperiance', 'player_stats.gameID as gameID'])
-                    ->where('teamName', $game['hosts'])
-                    ->where('apperiance', true)
-                    ->where('gameID', $gameID),
-                'visitors' => PlayerStats::join('players', function ($join) {
-                    $join->on('player_stats.playerID', '=', 'players.id');})
-                    ->get(['players.name as name', 'players.surname as surname', 'player_stats.teamName as teamName', 'player_stats.apperiance as apperiance', 'player_stats.gameID as gameID'])
-                    ->where('teamName', $game['visitors'])
-                    ->where('apperiance', true)
-                    ->where('gameID', $gameID),
-                'goals' => PlayerStats::join('players', function ($join) {
-                    $join->on('player_stats.playerID', '=', 'players.id');})
-                    ->orderBy('player_stats.minute', 'ASC')
-                    ->get(['players.name as name', 'players.surname as surname', 'player_stats.teamName as teamName',
-                     'player_stats.gameID as gameID', 'player_stats.apperiance as apperiance', 'player_stats.goal as goal',
-                     'player_stats.assistantID as assistantID', 'player_stats.minute as minute'])
-                    ->where('gameID', $gameID)
-                    ->where('apperiance', false)
-                    
-            ]); 
+        return view('games.show', [
+            'game' => $game,
+            'hosts' => PlayerStats::join('players', function ($join) {
+                $join->on('player_stats.playerID', '=', 'players.id');
+            })
+                ->get(['players.name as name', 'players.surname as surname', 'player_stats.teamName as teamName', 'player_stats.apperiance as apperiance', 'player_stats.gameID as gameID'])
+                ->where('teamName', $game['hosts'])
+                ->where('apperiance', true)
+                ->where('gameID', $gameID),
+            'visitors' => PlayerStats::join('players', function ($join) {
+                $join->on('player_stats.playerID', '=', 'players.id');
+            })
+                ->get(['players.name as name', 'players.surname as surname', 'player_stats.teamName as teamName', 'player_stats.apperiance as apperiance', 'player_stats.gameID as gameID'])
+                ->where('teamName', $game['visitors'])
+                ->where('apperiance', true)
+                ->where('gameID', $gameID),
+            'goals' => PlayerStats::join('players', function ($join) {
+                $join->on('player_stats.playerID', '=', 'players.id');
+            })
+                ->orderBy('player_stats.minute', 'ASC')
+                ->get([
+                    'players.name as name', 'players.surname as surname', 'player_stats.teamName as teamName',
+                    'player_stats.gameID as gameID', 'player_stats.apperiance as apperiance', 'player_stats.goal as goal',
+                    'player_stats.assistantID as assistantID', 'player_stats.minute as minute'
+                ])
+                ->where('gameID', $gameID)
+                ->where('apperiance', false)
 
+        ]);
     }
 
     public function generateFixture(Request $request)
-    {  
-        return print_r(new GenerateFixtureService());
+    {
+        $teams = DB::table('junior_league_tables')->where('competitionID', $request->id)->where('stage', $request->stage)->pluck('teamName')->toArray();
+
+        foreach ((new GenerateFixtureService($teams))->fixtures as $game) {
+            echo $game['host']. ' vs '.$game['visitor']. ' runda '.$game['round']. '<br>';
+        };
     }
-
-
 }
