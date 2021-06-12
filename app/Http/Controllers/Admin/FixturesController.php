@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Services\GenerateFixtureService;
 use App\Models\Admin\Fixture;
 use App\Models\Admin\PlayerStats;
 use App\Models\Admin\Team;
@@ -132,6 +133,11 @@ class FixturesController extends Controller
                     
             ]); 
 
+    }
+
+    public function generateFixture(Request $request)
+    {  
+        return print_r(new GenerateFixtureService());
     }
 
 

@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [App\Http\Controllers\SiteController::class, 'index']);
 
+Route::post('/test', [App\Http\Controllers\Admin\FixturesController::class, 'generateFixture'])->name('test');
+
 Route::get('/import_excel', [App\Http\Controllers\ImportExcelController::class, 'index']);
 Route::post('import_excel/import/{competitionID}', [App\Http\Controllers\ImportExcelController::class, 'import']);
 
@@ -183,7 +185,3 @@ Route::prefix('/stats')->group(function () {
      Route::get('/show', [App\Http\Controllers\Admin\PlayerStatsController::class, 'show'])
           ->name('stats.show');
 });
-
-Auth::routes();
-
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');

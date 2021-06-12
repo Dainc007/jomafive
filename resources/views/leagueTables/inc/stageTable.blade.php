@@ -17,7 +17,7 @@
               $i=0; $i++
               @endphp
               @if(!empty($juniorTeams) > 0)
-              @foreach ($stage1 as $team)
+              @foreach ($stage1 as $group => $team)
               <tr>
                   <th scope="row"> {{$i}} </th>
                   <td>{{$team->teamName}}</td>
