@@ -17,13 +17,14 @@ class CreateJuniorFixturesTable extends Migration
             $table->id();
             $table->string('hosts');
             $table->string('visitors');
-            $table->integer('hosts_goals');
-            $table->integer('visitors_goals');
-            $table->date('date');
-            $table->time('hour');
-            $table->integer('pitch');
+            $table->integer('hosts_goals')->nullable();
+            $table->integer('visitors_goals')->nullable();
+            $table->date('date')->nullable();
+            $table->time('hour')->nullable();
+            $table->integer('pitch')->nullable();
             $table->integer('competitionID');
-            $table->integer('stage')->nullable();
+            $table->integer('stage');
+            $table->integer('round');
             $table->timestamps();
         });
     }

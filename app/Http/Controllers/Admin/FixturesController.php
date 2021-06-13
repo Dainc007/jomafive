@@ -142,9 +142,20 @@ class FixturesController extends Controller
     public function generateFixture(Request $request)
     {
         $teams = DB::table('junior_league_tables')->where('competitionID', $request->id)->where('stage', $request->stage)->pluck('teamName')->toArray();
-
-        foreach ((new GenerateFixtureService($teams))->fixtures as $game) {
-            echo $game['host']. ' vs '.$game['visitor']. ' runda '.$game['round']. '<br>';
+        /* Need to add date and time generator and validator if fixure exist */
+        /* Next is form to enter scores and automaticly getting a level highter or lower */
+        $params = [];
+        $params['date'] = today()->format('Y-m-d');
+        $params['hour'] = '20:30';
+        $params['competitionID'] = $request->id;
+        $params['stage'] = $request->stage;
+        foreach ((new GenerateFixtureService($teams))->fixtures as $key => $matchday) {
+            $params['round'] = $key +1;
+            foreach ($matchday as $team) {
+                $params['hosts'] = $team['host'];
+                $params['visitors'] = $team['visitor'];
+            }
+            DB::table('junior_fixtures')->insert($params);
         };
     }
 }

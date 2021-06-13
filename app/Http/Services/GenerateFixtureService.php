@@ -73,6 +73,7 @@ class GenerateFixtureService
     {
         $trial = 0;
         $fixtures = [];
+        $matchday = [];
 
         do {
             if ($trial === $this->maxTrials) {
@@ -103,10 +104,11 @@ class GenerateFixtureService
                 $pair = [];
                 $pair['host'] = $teamA;
                 $pair['visitor'] = $teamB;
-                $pair['round'] = $round;
 
-                $fixtures[] = $pair;
+                $matchday[] = $pair;
             }
+
+            $fixtures[] = $matchday;
         }
 
 
