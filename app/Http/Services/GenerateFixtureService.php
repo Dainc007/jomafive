@@ -2,6 +2,7 @@
 
 namespace App\Http\Services;
 
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class GenerateFixtureService
@@ -69,11 +70,55 @@ class GenerateFixtureService
         return $result;
     }
 
+    public static function generateSchedule($fixtures)
+    {
+        $request['startDate'] = '2021-01-01';
+        $request['startTime'] = '20:00';
+        $request['endTime']   = '22:00';
+        $request['numOfPitches']   = 2;
+
+        $startDate = $request['startDate'];
+        $startDate = Carbon::createFromDate($startDate);
+
+        $startTime = $request['startTime'];
+        $startTime = Carbon::createFromTimeString($request['startTime']);
+
+        $beginTime = $request['startTime'];
+        $beginTime = Carbon::createFromTimeString($request['startTime']);
+
+        $endTime = $request['endTime'];
+        $endTime = Carbon::createFromTimeString($request['endTime']);
+
+        $date = $startDate;
+        $time = $startTime;
+
+        $gameTime = 90;
+        $pitch = 1;
+
+        foreach ($fixtures as $round => $pair) {
+
+            if ($request['numOfPitches'] >= $pitch) {
+                $pair['pitch'] = $pitch;
+                $pitch++;
+            } else {
+                $pitch = 1;
+                $time->addMinutes($gameTime);
+            }
+            $pair['time']  =  $time;
+
+            if ($request['endTime'] >= $time) {
+                $pair['date']  =  $date;
+            } else {
+                $time = $startTime;
+                $date->addDays(7);
+            }
+        }
+    }
+
     private function generateFixtures(array $teams)
     {
         $trial = 0;
         $fixtures = [];
-        $matchday = [];
 
         do {
             if ($trial === $this->maxTrials) {
@@ -98,6 +143,8 @@ class GenerateFixtureService
 
         foreach ($meetings as $round => $matches) {
 
+            $matchday = [];
+
             foreach ($matches as $index => $teams) {
                 [$teamA, $teamB] = $teams;
 
@@ -111,7 +158,30 @@ class GenerateFixtureService
             $fixtures[] = $matchday;
         }
 
+        print_r($fixtures);
+        die;
 
         return $fixtures;
     }
 }
+
+$teams = ['Arsenal', 'Burnley', 'Chelsea', 'Dinamo Moskwa'];
+$fixtures = new GenerateFixtureService($teams);
+$schedule = GenerateFixtureService::generateSchedule($fixtures);
+
+$params = [];
+$params['date'] = today()->format('Y-m-d');
+$params['hour'] = '20:30';
+$params['competitionID'] = 20;
+$params['stage'] = 1;
+
+foreach ((new GenerateFixtureService($teams))->fixtures as $key => $matchday) {
+    $params['round'] = $key + 1;
+    foreach ($matchday as $team) {
+        $params['hosts'] = $team['host'];
+        $params['visitors'] = $team['visitor'];
+    }
+
+    print_r($params);
+    /* DB::table('junior_fixtures')->insert($params); */
+};
