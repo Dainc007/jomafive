@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', [App\Http\Controllers\SiteController::class, 'index']);
 
 Route::post('/test', [App\Http\Controllers\Admin\FixturesController::class, 'generateFixture'])->name('test');
+Route::get('/service', [App\Http\Services\GenerateFixtureService::class, 'test'])->name('service');
 
 Route::get('/import_excel', [App\Http\Controllers\ImportExcelController::class, 'index']);
 Route::post('import_excel/import/{competitionID}', [App\Http\Controllers\ImportExcelController::class, 'import']);

@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use Carbon\Carbon;
+use Carbon\CarbonImmutable;
 
 class GenerateFixtureService
 {
@@ -12,33 +13,53 @@ class GenerateFixtureService
         $schedule = [];
         $fixtures = self::generateMeetings($teams);
 
-        $competitionId = $details['competitionId'];
-        $date = Carbon::createFromDate($details['startDate']);
-        $hour          = $details['firstGameHour'];
-        $lastGameHour  = $details['lastGameHour'];
+        $competitionId = $details['competitionId'] ?? '';
+
+        $firstGameHour = CarbonImmutable::createFromTimeString($details['firstGameHour']);
+        $lastGameHour  = CarbonImmutable::createFromTimeString($details['lastGameHour']);
+        $startDate     = CarbonImmutable::createFromDate($details['startDate']);
         $gameDuration  = $details['gameDuration'];
+
+        $numOfPitches  = $details['numOfPitches'] ?? 1;
         $pitch = 1;
-        $stage = 1;
+        $stage = $details['stage'] ?? 1;
 
-        foreach ($fixtures as $round => $pair) {
+        $date = $startDate;
+        $hour = $firstGameHour;
 
+        foreach ($fixtures as $key => $pair) {
             $round = [];
             foreach ($pair as $team) {
+
+                if ($pitch > $numOfPitches) {
+                    $pitch = 1;
+                    $hour = $hour->addMinutes($gameDuration);
+                }
+
+                if ($hour > $lastGameHour) {
+                    $hour = $firstGameHour;
+                    $date = $date->addWeek();
+                }
 
                 $host    = $team[0];
                 $visitor = $team[1];
 
                 $game = [
-                    'host'    => $host,
-                    'visitor' => $visitor,
-                    'date'    => $date,
-                    'time'    => $hour,
+                    'hosts'    => $host,
+                    'visitors' => $visitor,
+                    'date'    => $date->format('Y-m-d'),
+                    'hour'    => $hour->format('H:i'),
                     'pitch'   => $pitch,
                     'stage'   => $stage,
+                    'competitionId' => $competitionId,
+                    'round'     => $key + 1,
                 ];
 
                 $round[] = $game;
+
+                $pitch++;
             }
+
             $schedule[] = $round;
         }
 
@@ -94,30 +115,33 @@ class GenerateFixtureService
 
         return $result;
     }
+
+    public static function test()
+    {
+        $teams = [
+            'Polska',
+            'Brazylia',
+            'Czechy',
+            'Grecja',
+            'Portugalia',
+            'Hiszpania',
+            'Francja',
+            'Włochy',
+            'Japonia',
+            'Dania',
+            'Szwecja',
+            'Kolumbia',
+        ];
+
+        $details = [
+            'competitionId' => 10,
+            'startDate'     => '2021-01-01',
+            'firstGameHour' => '20:20',
+            'lastGameHour'  => '22:00',
+            'gameDuration'  => 40,
+            'numOfPitches'  => 2,
+
+        ];
+
+    }
 }
-
-$teams = [
-    'Polska',
-    'Brazylia',
-    'Czechy',
-    'Grecja',
-    'Portugalia',
-    'Hiszpania',
-    'Francja',
-    'Włochy',
-    'Japonia',
-    'Dania',
-    'Szwecja',
-    'Kolumbia',
-];
-
-$details = [
-    'competitionId' => 10,
-    'startDate'     => '2021-01-01',
-    'firstGameHour' => '20:00',
-    'lastGameHour'  => '22:00',
-    'gameDuration'  => 40,
-
-];
-
-print_r(GenerateFixtureService::generateMeetingsWithSchedule($teams, $details));

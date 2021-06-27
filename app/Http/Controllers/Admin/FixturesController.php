@@ -141,21 +141,28 @@ class FixturesController extends Controller
 
     public function generateFixture(Request $request)
     {
-        $teams = DB::table('junior_league_tables')->where('competitionID', $request->id)->where('stage', $request->stage)->pluck('teamName')->toArray();
-        /* Need to add date and time generator and validator if fixure exist */
+        $teams = DB::table('junior_league_tables')->where('competitionID', $request->id)
+            ->where('stage', $request->stage)->pluck('teamName')->toArray();
+
+        $details = [
+            'competitionId' => $request->id,
+            'startDate'     => $request->startDate,
+            'firstGameHour' => $request->firstGameHour,
+            'lastGameHour'  => $request->lastGameHour,
+            'gameDuration'  => $request->gameDuration,
+            'numOfPitches'  => $request->numOfPitches,
+            'stage'         => $request->stage,
+
+        ];
+        /*  validator if fixure exist and all needed data*/
         /* Next is form to enter scores and automaticly getting a level highter or lower */
-        $params = [];
-        $params['date'] = today()->format('Y-m-d');
-        $params['hour'] = '20:30';
-        $params['competitionID'] = $request->id;
-        $params['stage'] = $request->stage;
-        foreach ((new GenerateFixtureService($teams))->fixtures as $key => $matchday) {
-            $params['round'] = $key +1;
-            foreach ($matchday as $team) {
-                $params['hosts'] = $team['host'];
-                $params['visitors'] = $team['visitor'];
+
+        $schedule =  GenerateFixtureService::generateMeetingsWithSchedule($teams, $details);
+        foreach ($schedule as $round => $games) {
+            echo 'runda: ' . $round + 1 . '<br>';
+            foreach ($games as $game) {
+                DB::table('junior_fixtures')->insert($game);
             }
-            DB::table('junior_fixtures')->insert($params);
-        };
+        }
     }
 }
