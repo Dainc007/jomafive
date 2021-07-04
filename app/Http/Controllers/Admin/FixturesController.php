@@ -7,6 +7,7 @@ use App\Http\Services\GenerateFixtureService;
 use App\Models\Admin\Fixture;
 use App\Models\Admin\PlayerStats;
 use App\Models\Admin\Team;
+use App\Models\JuniorFixture;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -162,6 +163,21 @@ class FixturesController extends Controller
             echo 'runda: ' . $round + 1 . '<br>';
             foreach ($games as $game) {
                 DB::table('junior_fixtures')->insert($game);
+            }
+        }
+    }
+
+    public function form(Request $request)
+    {
+        $games = array_chunk($request->game, 3);
+
+        foreach ($games as $game) {
+            if ($game[1] !== null) {
+                $fixture = JuniorFixture::find($game[0]);
+
+                $fixture->hosts_goals = $game[1];
+                $fixture->visitors_goals = $game[2];
+                $fixture->save();
             }
         }
     }
