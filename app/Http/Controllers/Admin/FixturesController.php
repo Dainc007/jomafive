@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Services\GenerateFixtureService;
+use App\Http\Services\LeagueTableService;
 use App\Models\Admin\Fixture;
+use App\Models\Admin\JuniorLeagueTable;
 use App\Models\Admin\PlayerStats;
-use App\Models\Admin\Team;
 use App\Models\JuniorFixture;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -71,9 +72,7 @@ class FixturesController extends Controller
     public function store(Request $request)
     {
         if ($request->has('hosts')) {
-
             for ($i = 0; $i < count($request['competitionID']);) {
-
                 $x = DB::table('fixtures')->insert([
                     'competitionID' => $request->competitionID[$i],
                     'hosts' => $request->hosts[$i],
@@ -142,8 +141,22 @@ class FixturesController extends Controller
 
     public function generateFixture(Request $request)
     {
-        $teams = DB::table('junior_league_tables')->where('competitionID', $request->id)
-            ->where('stage', $request->stage)->pluck('teamName')->toArray();
+        /* checking if fixture already exist */
+        $fixtureExist = JuniorFixture::where('competitionID', $request->id)->where('stage', $request->stage)->first();
+
+        if ($fixtureExist !== null) {
+            return 'Fixture Already Exist';
+            die;
+        }
+
+        $teams = JuniorLeagueTable::where('competitionID', $request->id)
+            ->where('stage', $request->stage)->get();
+
+        $groups = [
+            $teams->where('group', 1)->pluck('teamName')->toArray(),
+            $teams->where('group', 2)->pluck('teamName')->toArray(),
+            $teams->where('group', 3)->pluck('teamName')->toArray(),
+        ];
 
         $details = [
             'competitionId' => $request->id,
@@ -155,16 +168,19 @@ class FixturesController extends Controller
             'stage'         => $request->stage,
 
         ];
-        /*  validator if fixure exist and all needed data*/
-        /* Next is form to enter scores and automaticly getting a level highter or lower */
 
-        $schedule =  GenerateFixtureService::generateMeetingsWithSchedule($teams, $details);
-        foreach ($schedule as $round => $games) {
-            echo 'runda: ' . $round + 1 . '<br>';
-            foreach ($games as $game) {
-                DB::table('junior_fixtures')->insert($game);
+        foreach ($groups as $group) {
+            $schedule =  GenerateFixtureService::generateMeetingsWithSchedule($group, $details);
+            foreach ($schedule as $round => $games) {
+                /* echo 'runda: ' . $round + 1 . '<br>'; */
+                foreach ($games as $game) {
+
+                    JuniorFixture::insert($game);
+                }
             }
         }
+
+        return back();
     }
 
     public function form(Request $request)
@@ -175,10 +191,30 @@ class FixturesController extends Controller
             if ($game[1] !== null) {
                 $fixture = JuniorFixture::find($game[0]);
 
+                /* checking if score has been set earlier */
+                if ($fixture->hosts_goals !== null) {
+                    continue;
+                }
+
                 $fixture->hosts_goals = $game[1];
                 $fixture->visitors_goals = $game[2];
                 $fixture->save();
+
+                /* Updating League Table */
+
+                $data = [
+                    'hosts'          => $fixture->hosts,
+                    'visitors'       => $fixture->visitors,
+                    'hosts_goals'    => $game[1],
+                    'visitors_goals' => $game[2],
+                    'competitionId'  => $fixture->competitionID,
+                    'stage'          => $fixture->stage,
+                ];
+
+                LeagueTableService::update($data);
             }
         }
+
+        return back();
     }
 }

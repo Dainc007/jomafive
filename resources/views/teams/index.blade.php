@@ -31,8 +31,10 @@
                         <small class="">Poziom: {{$team->level}}</small>
                     </div>
 
+                    @if($team->manager)
                     {{$team->manager->name}} {{$team->manager->surname}} {{$team->manager->phoneNumber}}
                     {{$team->manager->email}}
+                    @endif
 
                 </div>
             </div>

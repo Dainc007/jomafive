@@ -19,7 +19,7 @@ class CreateManagersTable extends Migration
             $table->string('surname');
             $table->integer('phoneNumber');
             $table->string('email');
-            $table->integer('teamID');
+            $table->integer('team_id');
             $table->enum('league', ['kid', 'weekend', 'business']);
 
             $table->timestamps();

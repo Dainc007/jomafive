@@ -10,6 +10,6 @@ class JuniorLeagueTable extends Model
     use HasFactory;
 
     protected $fillable = [
-        'class', 'level'
+        'class', 'level', 'group',
     ];
 }
