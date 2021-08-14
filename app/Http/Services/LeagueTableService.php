@@ -3,6 +3,7 @@
 namespace App\Http\Services;
 
 use App\Models\Admin\JuniorLeagueTable;
+use App\Models\JuniorFixture;
 
 class LeagueTableService
 {
@@ -97,5 +98,104 @@ class LeagueTableService
     {
         $hosts->save();
         $visitors->save();
+    }
+
+    public static function teamToPromote($teams)
+    {
+        $firstTeam   = $teams->first();
+        $equalTeams  = $teams->where('points', $firstTeam['points']);
+
+        if ($equalTeams->count() == 1) {
+            return $firstTeam;
+        }
+
+        if ($equalTeams->count() == 2) {
+            $secondTeam = $equalTeams->where('teamId', '!=', $firstTeam->teamId)->first();
+
+            $game   = self::getGame($firstTeam, $secondTeam, $firstTeam->competitionID, $firstTeam->stage);
+
+            if ($game !== null) {
+                $winner = self::getWinner($game);
+                if ($winner !== false) {
+                    $winner = $teams->where('teamName', $winner)->first();
+                    return $winner;
+                }
+            }
+        }
+    }
+
+    public static function teamToReleagate($teams)
+    {
+        $firstTeam   = ($teams->reverse())->first();
+        $equalTeams  = $teams->where('points', $firstTeam['points']);
+
+        if ($equalTeams->count() == 1) {
+            return $firstTeam;
+        }
+
+        if ($equalTeams->count() == 2) {
+            $secondTeam = $equalTeams->where('teamId', '!=', $firstTeam->teamId)->first();
+
+            $game   = self::getGame($firstTeam, $secondTeam, $firstTeam->competitionID, $firstTeam->stage);
+
+            if ($game !== null) {
+                $looser = self::getLooser($game);
+                if ($looser !== false) {
+                    $looser = $teams->where('teamName', $looser)->first();
+                    return $looser;
+                }
+            }
+        }
+    }
+
+    public static function getGame($firstTeam, $secondTeam, $id, $stage)
+    {
+        $game = JuniorFixture::where(
+            [
+                ['hosts', $firstTeam->teamName],
+                ['visitors', $secondTeam->teamName],
+                ['competitionID', $id],
+                ['stage', $stage],
+            ]
+        )->first();
+
+        $game2 = JuniorFixture::where([
+            ['hosts', $secondTeam->teamName],
+            ['visitors', $firstTeam->teamName],
+            ['competitionID', $id],
+            ['stage', $stage],
+        ])->first();
+
+        if ($game == null) {
+            return $game2;
+        }
+
+        return $game;
+    }
+
+    public static function getWinner($game)
+    {
+        if ($game->hosts_goals == $game->visitors_goals) {
+            return false;
+        }
+
+        if ($game->hosts_goals > $game->visitors_goals) {
+            return $game->hosts;
+        }
+
+        return $game->visitors;
+    }
+
+    public static function getLooser($game)
+    {
+        if ($game->hosts_goals == $game->visitors_goals) {
+            return false;
+        }
+
+        if ($game->hosts_goals > $game->visitors_goals) {
+            return $game->visitors;
+        }
+
+        return $game->hosts;
     }
 }

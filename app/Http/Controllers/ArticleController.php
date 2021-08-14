@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreArticleRequest;
 use App\Http\Requests\UpdateArticleRequest;
+use App\Http\Services\LeagueTableService;
 use App\Models\Admin\Competition;
 use App\Models\Admin\Fixture;
 use App\Models\Admin\JuniorCompetition;
@@ -19,11 +20,60 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
-
 class ArticleController extends Controller
 {
     public function index()
     {
+        $juniorFixture =  JuniorFixture::where('competitionID', 30)->first();
+
+        /* There is no unplayed games. We can make promotions and relegations */
+        if ($juniorFixture->stage < 3) {
+            for ($group = 1; $group < 4; $group++) {
+                $teams = JuniorLeagueTable::where('competitionID', $juniorFixture->competitionID)
+                    ->where('stage', $juniorFixture->stage)
+                    ->where('group', $group)
+                    ->orderBy('points', 'DESC')->orderBy('bilans', 'DESC')->orderBy('goals_scored', 'DESC')
+                    ->get();
+
+                $teamToPromote = LeagueTableService::teamToPromote($teams);
+                $teamToRelegate = LeagueTableService::teamToReleagate($teams);
+
+                if ($group == 1) {
+                    if ($teamToRelegate !== null) {
+                        JuniorLeagueTable::where('teamId', $teamToRelegate->teamId)
+                            ->where('stage', $teamToRelegate->stage + 1)->where('group', $group)
+                            ->update(['group' => $group + 1]);
+                    }
+                    continue;
+                }
+
+                if ($group == 2) {
+                    if ($teamToRelegate !== null) {
+                        JuniorLeagueTable::where('teamId', $teamToRelegate->teamId)
+                            ->where('stage', $teamToRelegate->stage + 1)->where('group', $group)
+                            ->update(['group' => $group + 1]);
+                    }
+
+                    if ($teamToPromote !== null) {
+                        JuniorLeagueTable::where('teamId', $teamToPromote->teamId)
+                            ->where('stage', $teamToRelegate->stage + 1)->where('group', $group)
+                            ->update(['group' => $teamToPromote->group - 1]);
+                    }
+                    continue;
+                }
+
+                if ($group == 3) {
+                    if ($teamToPromote !== null) {
+                        JuniorLeagueTable::where('teamId', $teamToPromote->teamId)
+                            ->where('stage', $teamToPromote->stage + 1)->where('group', $group)
+                            ->update(['group' => $teamToPromote->group - 1]);
+                    }
+                    continue;
+                }
+            }
+        }
+
+
         return view('articles.index', [
             'allArticles'      => DB::table('articles')->orderBy('id', 'DESC')->limit(4)->get(),
             'leagueHeader'     => 'W JOMAFIVE',
@@ -95,7 +145,7 @@ class ArticleController extends Controller
             'league'       => 'Weekendowa',
             'fixtures' => Fixture::where('competitionID', $competitionID)->where('hosts_goals', null)
                 ->orderBy('date', 'ASC')->get(),
-                'latest_scores' => Fixture::where('competitionID', $competitionID)->where('hosts_goals', '!=', null)
+            'latest_scores' => Fixture::where('competitionID', $competitionID)->where('hosts_goals', '!=', null)
                 ->orderBy('date', 'ASC')->get(),
             'weekendArticles'  => Article::where('league', Article::getLeague('Weekend'))->orderBy('id', 'DESC')->limit(3)->get(),
             'leagueTable' => LeagueTable::where('competitionID', $competitionID)
@@ -115,14 +165,14 @@ class ArticleController extends Controller
             'league'       => 'Dziecięca',
             'kidArticles'      => Article::where('league', Article::getLeague('Kid'))->orderBy('id', 'DESC')->limit(3)->get(),
             'leagueTable' => JuniorLeagueTable::where('competitionID', $competitionID)
-            ->select('level', 'teamId', 'teamName', DB::raw(
-                'SUM(points) as points, SUM(bilans) as bilans, SUM(games) as games, SUM(wins) as wins,
+                ->select('level', 'teamId', 'teamName', DB::raw(
+                    'SUM(points) as points, SUM(bilans) as bilans, SUM(games) as games, SUM(wins) as wins,
                 SUM(draws) as draws, SUM(losts) as losts'
-            ))
-            ->groupBy('teamId', 'level', 'teamName')
-            ->orderBy('points', 'DESC')
-            ->orderBy('bilans', 'DESC') 
-            ->get(),
+                ))
+                ->groupBy('teamId', 'level', 'teamName')
+                ->orderBy('points', 'DESC')
+                ->orderBy('bilans', 'DESC')
+                ->get(),
 
             'fixtures' => JuniorFixture::where('competitionID', $competitionID)->where('hosts_goals', null)
                 ->orderBy('date', 'ASC')->get(),

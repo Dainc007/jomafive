@@ -97,7 +97,7 @@ class CompetitionController extends Controller
                 DB::table('league_tables')->insert([
                     'teamName' => $teamName,
                     'competitionID' => $competitionID,
-                    'teamID' => Team::where('name', $teamName)->value('id')
+                    'teamId' => Team::where('name', $teamName)->value('id')
                 ]);
             }
         }
