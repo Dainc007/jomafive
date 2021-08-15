@@ -115,11 +115,11 @@ class ArticleController extends Controller
             'league'       => 'Dziecięca',
             'kidArticles'      => Article::where('league', Article::getLeague('Kid'))->orderBy('id', 'DESC')->limit(3)->get(),
             'leagueTable' => JuniorLeagueTable::where('competitionID', $competitionID)
-                ->select('level', 'teamId', 'teamName', DB::raw(
+                ->select('stage', 'teamId', 'teamName', DB::raw(
                     'SUM(points) as points, SUM(bilans) as bilans, SUM(games) as games, SUM(wins) as wins,
                 SUM(draws) as draws, SUM(losts) as losts'
                 ))
-                ->groupBy('teamId', 'level', 'teamName')
+                ->groupBy('teamId', 'stage', 'teamName')
                 ->orderBy('points', 'DESC')
                 ->orderBy('bilans', 'DESC')
                 ->get(),

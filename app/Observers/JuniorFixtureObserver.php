@@ -62,7 +62,7 @@ class JuniorFixtureObserver
 
                         if ($teamToPromote !== null) {
                             JuniorLeagueTable::where('teamId', $teamToPromote->teamId)
-                                ->where('stage', $teamToRelegate->stage + 1)->where('group', $group)
+                                ->where('stage', $teamToPromote->stage + 1)->where('group', $group)
                                 ->update(['group' => $teamToPromote->group - 1]);
                         }
                         continue;

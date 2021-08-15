@@ -136,6 +136,9 @@ Route::prefix('/leagueTables')->group(function () {
 
      Route::get('/show', [App\Http\Controllers\Admin\LeagueTableController::class, 'show'])
           ->name('leagueTables.show');
+
+     Route::post('/edit/{id}', [App\Http\Controllers\Admin\LeagueTableController::class, 'edit'])
+          ->name('leagueTables.edit');
 });
 
 Route::prefix('/competitions')->group(function () {

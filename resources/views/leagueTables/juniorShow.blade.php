@@ -20,11 +20,11 @@
         @endif
     </div>
 
-    <div class="col">
+
     @if(Auth::check())
-        @include('leagueTables.inc.adminPanel')
+    @include('leagueTables.inc.adminPanel')
     @endif
-    </div>
+
 
 </div>
 

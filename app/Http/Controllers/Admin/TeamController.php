@@ -127,7 +127,7 @@ class TeamController extends Controller
                     'surname' => $request->surname[$i],
                     'yearOfBirth' => $request->class,
                     'teamName' => $request['teamName'],
-                    'team_id' => $teamID
+                    'teamId' => $teamID
                 ]);
                 $i++;
             }

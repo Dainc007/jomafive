@@ -35,8 +35,19 @@ class LeagueTableController extends Controller
         ]);
     }
 
+    public function edit(int $id, Request $request)
+    {
+
+        $table = JuniorLeagueTable::where('competitionID', $id)->where('stage', $request->stage)->where('teamName', $request->team)->first();
+
+        if ($table != null) {
+            $table->group = $request['group'];
+            $table->save();
+            return back();
+        }
+    }
+
     public function updateTable(Request $request)
     {
-        
     }
 }
